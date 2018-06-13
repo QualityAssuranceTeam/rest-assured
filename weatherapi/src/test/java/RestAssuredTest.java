@@ -1,4 +1,6 @@
+import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static com.jayway.restassured.RestAssured.*;
@@ -7,11 +9,20 @@ import static org.hamcrest.CoreMatchers.equalTo;
 
 public class RestAssuredTest {
 
+    @BeforeClass
+    public static void setUp(){
+
+        RestAssured.baseURI = "http://restapi.demoqa.com";
+        RestAssured.basePath = "/utilities";
+
+    }
+
     @Test
     public void checkLocation()
     {
+
         when().
-                get("http://restapi.demoqa.com/utilities/locationutil/mylocation").
+                get("/locationutil/mylocation").
         then().
                 contentType(ContentType.JSON).
         and().
@@ -23,8 +34,9 @@ public class RestAssuredTest {
     @Test
     public void checkWeather()
     {
+
         when().
-                get("http://restapi.demoqa.com/utilities/weatherfull/city/sofia").
+                get("/weatherfull/city/sofia").
         then().
                 contentType(ContentType.JSON).
         and().
@@ -37,6 +49,20 @@ public class RestAssuredTest {
                 body("WindSpeed", containsString("Km per hour")).
         and().
                 body("WindDirectionDegree", containsString("Degree"));
+
+    }
+
+    @Test
+    public void invalidGet(){
+
+        when().
+                get("/weatherfull/city/").
+        then().
+                contentType(ContentType.JSON).
+        and().
+                body("FaultId", equalTo("FAULT_INVALID_GET_REQUEST")).
+        and().
+                body("fault", containsString("Invalid or Missing GET"));
 
     }
 
